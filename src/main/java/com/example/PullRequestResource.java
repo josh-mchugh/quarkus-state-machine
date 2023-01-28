@@ -9,6 +9,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -25,13 +27,14 @@ public class PullRequestResource {
         Integer id = counter.incrementAndGet();
         pullRequests.put(id, PullRequestState.DRAFT);
 
-        URI uri = UriBuilder.fromPath(String.format("/pull-request/%s/open", id )).build();
+        URI uri = UriBuilder.fromPath(String.format("/pull-request/%s", id )).build();
 
         return Response.created(uri).build();
     }
 
     @GET
     @Path("/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
     public Response getPullRequest(@PathParam("id") Integer id) {
 
         return Response.ok(pullRequests.get(id)).build();
