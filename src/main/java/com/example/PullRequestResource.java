@@ -37,6 +37,33 @@ public class PullRequestResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response getPullRequest(@PathParam("id") Integer id) {
 
+        if(!pullRequests.containsKey(id)) {
+
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(pullRequests.get(id)).build();
+    }
+
+    @POST
+    @Path("/{id}/open")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response postPullRequestOpen(@PathParam("id") Integer id) {
+
+        if(!pullRequests.containsKey(id)) {
+
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        PullRequestState currentState = pullRequests.get(id);
+
+        if(!currentState.canProccedToNextState(PullRequestState.OPEN)) {
+
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        pullRequests.put(id, PullRequestState.OPEN);
+
         return Response.ok(pullRequests.get(id)).build();
     }
 }
