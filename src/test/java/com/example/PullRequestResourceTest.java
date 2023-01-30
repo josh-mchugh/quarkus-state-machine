@@ -73,6 +73,42 @@ public class PullRequestResourceTest {
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 
+    @Test
+    public void whenPullRequestSetToMergeFromDraftThenExpectBadResponse() {
+
+        Integer pullRequestId = createPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/merge", pullRequestId))
+            .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void whenPullRequestSetToMergeAndPullRequestIdDoesNotExistsThenExpectNotFound() {
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/merge", Integer.MIN_VALUE))
+            .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    public void whenPullRequestSetToMergeFromOpenThenExpectResponse() {
+
+        Integer pullRequestId = createPullRequest();
+        setPullRequestOpen(pullRequestId);
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/merge", pullRequestId))
+            .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body(is("MERGED"));
+    }
+
     private Integer createPullRequest() {
 
         String pullrequestUrl = given()
@@ -85,5 +121,13 @@ public class PullRequestResourceTest {
         String[] pathSegments = path.substring(0).split("/pull-request/");
 
         return Integer.valueOf(pathSegments[1]);
+    }
+    
+    private void setPullRequestOpen(Integer pullRequestId) {
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/open", pullRequestId))
+            .thenReturn();
     }
 }

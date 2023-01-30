@@ -50,19 +50,45 @@ public class PullRequestResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response postPullRequestOpen(@PathParam("id") Integer id) {
 
+        Response.Status validationStatues = validatePullRequest(id, PullRequestState.OPEN);
+
+        return Response.Status.OK.equals(validationStatues)
+            ? updatePullRequest(id, PullRequestState.OPEN)
+            : Response.status(validationStatues).build();
+    }
+
+    @POST
+    @Path("/{id}/merge")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response postPullRequestMerge(@PathParam("id") Integer id) {
+
+        Response.Status validationStatues = validatePullRequest(id, PullRequestState.MERGED);
+
+        return Response.Status.OK.equals(validationStatues)
+            ? updatePullRequest(id, PullRequestState.MERGED)
+            : Response.status(validationStatues).build();
+    }
+
+    private Response.Status validatePullRequest(Integer id, PullRequestState nextState) {
+
         if(!pullRequests.containsKey(id)) {
 
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.Status.NOT_FOUND;
         }
 
         PullRequestState currentState = pullRequests.get(id);
 
-        if(!currentState.canProccedToNextState(PullRequestState.OPEN)) {
+        if(!currentState.canProccedToNextState(nextState)) {
 
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.Status.BAD_REQUEST;
         }
 
-        pullRequests.put(id, PullRequestState.OPEN);
+        return Response.Status.OK;
+    }
+
+    private Response updatePullRequest(Integer id, PullRequestState nextState) {
+
+        pullRequests.put(id, nextState);
 
         return Response.ok(pullRequests.get(id)).build();
     }
