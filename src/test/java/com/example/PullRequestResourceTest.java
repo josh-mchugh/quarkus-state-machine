@@ -29,7 +29,7 @@ public class PullRequestResourceTest {
     @Test
     public void whenGetPullRequestByIdThenResponse() {
 
-        Integer pullRequestId = createPullRequest();
+        Integer pullRequestId = createDraftPullRequest();
 
         given()
             .when()
@@ -52,7 +52,7 @@ public class PullRequestResourceTest {
     @Test
     public void whenPullRequestSetToOpenFromDraftThenExpectResponse() {
 
-        Integer pullRequestId = createPullRequest();
+        Integer pullRequestId = createDraftPullRequest();
 
         given()
             .when()
@@ -76,13 +76,26 @@ public class PullRequestResourceTest {
     @Test
     public void whenPullRequestSetToMergeFromDraftThenExpectBadResponse() {
 
-        Integer pullRequestId = createPullRequest();
+        Integer pullRequestId = createDraftPullRequest();
 
         given()
             .when()
                 .post(String.format("/pull-request/%s/merge", pullRequestId))
             .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void whenPullRequestSetToClosedFromDraftThenExpectResponse() {
+
+        Integer pullRequestId = createDraftPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/close", pullRequestId))
+            .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body(is("CLOSED"));
     }
 
     @Test
@@ -98,8 +111,7 @@ public class PullRequestResourceTest {
     @Test
     public void whenPullRequestSetToMergeFromOpenThenExpectResponse() {
 
-        Integer pullRequestId = createPullRequest();
-        setPullRequestOpen(pullRequestId);
+        Integer pullRequestId = createOpenPullRequest();
 
         given()
             .when()
@@ -109,7 +121,65 @@ public class PullRequestResourceTest {
                 .body(is("MERGED"));
     }
 
-    private Integer createPullRequest() {
+    @Test
+    public void whenPullRequestSetClosedFromMergeThenExpectBadRequest() {
+
+        Integer pullRequestId = createMegeredPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/open", pullRequestId))
+            .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void whenPullRequestSetToMergeWhenPullRequestIdIsInvalidThenExpectNotFound() {
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/merge", Integer.MIN_VALUE))
+            .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    public void whenPullRequestSetToClosedFromOpenThenExpectResponse() {
+
+        Integer pullRequestId = createOpenPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/close", pullRequestId))
+            .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body(is("CLOSED"));
+    }
+
+    @Test
+    public void whenPullRequestSetToOpenFromClosedthenExpectResponse() {
+
+        Integer pullRequestId = createClosedPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/open", pullRequestId))
+            .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body(is("OPEN"));
+    }
+
+    @Test
+    public void whenPullRequestSetToClosedWhenPullRequestIdDoesNotExistThenExpectNotFound() {
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/open", Integer.MIN_VALUE))
+            .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    private Integer createDraftPullRequest() {
 
         String pullrequestUrl = given()
             .when().post("/pull-request/create")
@@ -123,11 +193,39 @@ public class PullRequestResourceTest {
         return Integer.valueOf(pathSegments[1]);
     }
     
-    private void setPullRequestOpen(Integer pullRequestId) {
+    private Integer createOpenPullRequest() {
+
+        Integer pullRequestId = createDraftPullRequest();
 
         given()
             .when()
                 .post(String.format("/pull-request/%s/open", pullRequestId))
             .thenReturn();
+
+        return pullRequestId;
+    }
+
+    private Integer createMegeredPullRequest() {
+
+        Integer pullRequestId = createOpenPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/merge", pullRequestId))
+            .thenReturn();
+
+        return pullRequestId;
+    }
+
+    private Integer createClosedPullRequest() {
+
+        Integer pullRequestId = createOpenPullRequest();
+
+        given()
+            .when()
+                .post(String.format("/pull-request/%s/close", pullRequestId))
+            .thenReturn();
+
+        return pullRequestId;
     }
 }

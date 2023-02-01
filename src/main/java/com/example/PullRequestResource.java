@@ -48,13 +48,9 @@ public class PullRequestResource {
     @POST
     @Path("/{id}/open")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response postPullRequestOpen(@PathParam("id") Integer id) {
+    public Response postPullRequestOpen(@PathParam("id") Integer id, @PathParam("state") String state) {
 
-        Response.Status validationStatues = validatePullRequest(id, PullRequestState.OPEN);
-
-        return Response.Status.OK.equals(validationStatues)
-            ? updatePullRequest(id, PullRequestState.OPEN)
-            : Response.status(validationStatues).build();
+        return handlePullRequest(id, PullRequestState.OPEN);
     }
 
     @POST
@@ -62,31 +58,30 @@ public class PullRequestResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response postPullRequestMerge(@PathParam("id") Integer id) {
 
-        Response.Status validationStatues = validatePullRequest(id, PullRequestState.MERGED);
-
-        return Response.Status.OK.equals(validationStatues)
-            ? updatePullRequest(id, PullRequestState.MERGED)
-            : Response.status(validationStatues).build();
+        return handlePullRequest(id, PullRequestState.MERGED);
     }
 
-    private Response.Status validatePullRequest(Integer id, PullRequestState nextState) {
+    @POST
+    @Path("/{id}/close")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response postPullRequestClose(@PathParam("id") Integer id) {
+
+        return handlePullRequest(id, PullRequestState.CLOSED);
+    }
+
+    private Response handlePullRequest(Integer id, PullRequestState nextState) {
 
         if(!pullRequests.containsKey(id)) {
 
-            return Response.Status.NOT_FOUND;
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         PullRequestState currentState = pullRequests.get(id);
 
         if(!currentState.canProccedToNextState(nextState)) {
 
-            return Response.Status.BAD_REQUEST;
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-
-        return Response.Status.OK;
-    }
-
-    private Response updatePullRequest(Integer id, PullRequestState nextState) {
 
         pullRequests.put(id, nextState);
 
