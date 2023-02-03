@@ -8,7 +8,21 @@ Instead of using the LeaveRequestState for manging approval states of somones le
 
 ## State Diagram
 
+There are a total of 4 states within this state machine.
 
+1. DRAFT
+2. OPEN
+3. MERGED
+4. CLOSED
+
+DRAFT is the starting state.
+MERGED and closed are end states.
+
+DRAFT can transition to OPEN
+OPEN can transition to MERGED or CLOSED
+CLOSE can transition to OPEN
+
+![Diagram of the states and their transitions for the state machine](./images/state-diagram.png)
 
 ## Demostration
 
