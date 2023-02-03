@@ -26,7 +26,13 @@ CLOSE can transition to OPEN
 
 ## Demostration
 
+An example of a successful flow of creating a pull request and transitioning it to the merge state
 
+![Example of successful state transitions](./images/quarkus-state-machine-successful-example.gif)
+
+An example of an unsuccessful flow is creating a pull request and attempting to transition between states in an incorrect order
+
+![Example of unsuccessful state transitions](./images/quarkus-state-machine-unsuccessful-example.gif)
 
 ## Running the application in dev mode
 
