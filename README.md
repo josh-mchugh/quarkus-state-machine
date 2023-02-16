@@ -1,3 +1,6 @@
+![build](https://github.com/josh-mchugh/quarkus-state-machine/actions/workflows/main.yml/badge.svg)
+[![codecov](https://codecov.io/gh/josh-mchugh/quarkus-state-machine/branch/main/graph/badge.svg?token=7E1TWYKBSF)](https://codecov.io/gh/josh-mchugh/quarkus-state-machine)
+
 # Simple Statemachine With Quarkus
 
 This project is an experiment for designing a simple statemachine. I have used more complex statemachines such as [Spring Statemachine](https://spring.io/projects/spring-statemachine). I wanted to make a simple Java based statemachine pattern without the use of a framework. I used Quarkus as a RESTful API framework for demostration and practice purposes.
